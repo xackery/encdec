@@ -8,10 +8,10 @@ import (
 
 // Decoder is struct for decoding data.
 type Decoder struct {
-	order       binary.ByteOrder
-	r           io.ReadSeeker
-	recentError error
-	lastError   error
+	order      binary.ByteOrder
+	r          io.ReadSeeker
+	firstError error
+	lastError  error
 }
 
 // NewDecoder returns new Decoder.
@@ -32,6 +32,59 @@ func (d *Decoder) LastError() error {
 	return d.lastError
 }
 
+// Error returns first error that occured during read.
+func (d *Decoder) Error() error {
+	return d.firstError
+}
+
+// Bytes returns bytes.
+func (d *Decoder) Bytes(n int) []byte {
+	b := make([]byte, n)
+	_, err := io.ReadFull(d.r, b)
+	if err != nil {
+		pos, err := d.r.Seek(0, io.SeekCurrent)
+		if err != nil {
+			pos = -1
+		}
+		d.lastError = fmt.Errorf("pos %d: %w", pos, err)
+		if d.firstError != nil {
+			d.firstError = d.lastError
+		}
+	}
+	return b
+}
+
+// FixedString returns fixed string.
+func (d *Decoder) FixedString(n int) string {
+	return string(d.Bytes(n))
+}
+
+// StringZero reads the read stream until a zero terminator is found.
+func (d *Decoder) StringZero() string {
+	var s string
+	var buf [1]byte
+	var err error
+	for {
+		_, err = io.ReadFull(d.r, buf[:])
+		if err != nil {
+			pos, err := d.r.Seek(0, io.SeekCurrent)
+			if err != nil {
+				pos = -1
+			}
+			d.lastError = fmt.Errorf("pos %d: %w", pos, err)
+			if d.firstError != nil {
+				d.firstError = d.lastError
+			}
+			break
+		}
+		if buf[0] == 0 {
+			break
+		}
+		s += string(buf[:])
+	}
+	return s
+}
+
 // Uint8 returns uint8.
 func (d *Decoder) Uint8() uint8 {
 	var v uint8
@@ -42,8 +95,8 @@ func (d *Decoder) Uint8() uint8 {
 			pos = -1
 		}
 		d.lastError = fmt.Errorf("pos %d: %w", pos, err)
-		if d.recentError != nil {
-			d.recentError = d.lastError
+		if d.firstError != nil {
+			d.firstError = d.lastError
 		}
 	}
 	return v
@@ -59,8 +112,8 @@ func (d *Decoder) Uint16() uint16 {
 			pos = -1
 		}
 		d.lastError = fmt.Errorf("pos %d: %w", pos, err)
-		if d.recentError != nil {
-			d.recentError = d.lastError
+		if d.firstError != nil {
+			d.firstError = d.lastError
 		}
 	}
 	return v
@@ -77,8 +130,8 @@ func (d *Decoder) Uint32() uint32 {
 		}
 
 		d.lastError = fmt.Errorf("pos %d: %w", pos, err)
-		if d.recentError != nil {
-			d.recentError = d.lastError
+		if d.firstError != nil {
+			d.firstError = d.lastError
 		}
 	}
 	return v
@@ -95,8 +148,8 @@ func (d *Decoder) Uint64() uint64 {
 		}
 
 		d.lastError = fmt.Errorf("pos %d: %w", pos, err)
-		if d.recentError != nil {
-			d.recentError = d.lastError
+		if d.firstError != nil {
+			d.firstError = d.lastError
 		}
 	}
 	return v
@@ -112,8 +165,8 @@ func (d *Decoder) Int8() int8 {
 			pos = -1
 		}
 		d.lastError = fmt.Errorf("pos %d: %w", pos, err)
-		if d.recentError != nil {
-			d.recentError = d.lastError
+		if d.firstError != nil {
+			d.firstError = d.lastError
 		}
 	}
 	return v
@@ -129,8 +182,8 @@ func (d *Decoder) Int16() int16 {
 			pos = -1
 		}
 		d.lastError = fmt.Errorf("pos %d: %w", pos, err)
-		if d.recentError != nil {
-			d.recentError = d.lastError
+		if d.firstError != nil {
+			d.firstError = d.lastError
 		}
 	}
 	return v
@@ -147,8 +200,8 @@ func (d *Decoder) Int32() int32 {
 		}
 
 		d.lastError = fmt.Errorf("pos %d: %w", pos, err)
-		if d.recentError != nil {
-			d.recentError = d.lastError
+		if d.firstError != nil {
+			d.firstError = d.lastError
 		}
 	}
 	return v
@@ -165,8 +218,44 @@ func (d *Decoder) Int64() int64 {
 		}
 
 		d.lastError = fmt.Errorf("pos %d: %w", pos, err)
-		if d.recentError != nil {
-			d.recentError = d.lastError
+		if d.firstError != nil {
+			d.firstError = d.lastError
+		}
+	}
+	return v
+}
+
+// Float32 returns float32.
+func (d *Decoder) Float32() float32 {
+	var v float32
+	err := binary.Read(d.r, d.order, &v)
+	if err != nil {
+		pos, err := d.r.Seek(0, io.SeekCurrent)
+		if err != nil {
+			pos = -1
+		}
+
+		d.lastError = fmt.Errorf("pos %d: %w", pos, err)
+		if d.firstError != nil {
+			d.firstError = d.lastError
+		}
+	}
+	return v
+}
+
+// Float64 returns float64.
+func (d *Decoder) Float64() float64 {
+	var v float64
+	err := binary.Read(d.r, d.order, &v)
+	if err != nil {
+		pos, err := d.r.Seek(0, io.SeekCurrent)
+		if err != nil {
+			pos = -1
+		}
+
+		d.lastError = fmt.Errorf("pos %d: %w", pos, err)
+		if d.firstError != nil {
+			d.firstError = d.lastError
 		}
 	}
 	return v
