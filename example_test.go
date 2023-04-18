@@ -1,16 +1,13 @@
-# encdec
-Golang encoder/decoder from io.ReadSeeker and io.Writer
+package encdec
 
-Please note this is not a very rigorous way to decode a io.ReadSeeker/Writer.
+import (
+	"bytes"
+	"encoding/binary"
+	"fmt"
+	"io"
+	"testing"
+)
 
-I use io.ReadSeeker so I can know the position of a failure.
-
-TODO: add notes on how to convert io.Reader to io.ReadSeeker
-
-`go get github.com/xackery/encdec`
-
-Example usage (can be seen as a test [here](/example_test.go))
-```go
 type exampleStruct struct {
 	val1        int16
 	val2        uint32
@@ -19,6 +16,30 @@ type exampleStruct struct {
 	someStrZero string
 	val3        float32
 	someBytes   []byte
+}
+
+func TestExample(t *testing.T) {
+	r := bytes.NewReader([]byte{
+		0x01, 0x00, // val1
+		0x02, 0x00, 0x00, 0x00, // val2
+		0x61, 0x62, 0x63, // someStr1
+		0x04, 0x00, 0x00, 0x00, 0x64, 0x65, 0x66, 0x67, // someStr2
+		0x68, 0x69, 0x6a, 0x6b, 0x00, // someStrZero
+		0x00, 0x00, 0x80, 0x3f, // val3
+		0x01, 0x02, 0x03, 0x04, // someBytes
+	})
+	def, err := someReadSeekerExample(r)
+	if err != nil {
+		t.Fatalf("Failed someReadSeekerExample: %v", err)
+	}
+	fmt.Printf("%+v\n", def)
+
+	w := bytes.NewBuffer(nil)
+	err = def.someWriterExample(w)
+	if err != nil {
+		t.Fatalf("Failed someWriterExample: %v", err)
+	}
+
 }
 
 func someReadSeekerExample(r io.ReadSeeker) (*exampleStruct, error) {
@@ -55,12 +76,3 @@ func (def *exampleStruct) someWriterExample(w io.Writer) error {
 	}
 	return nil
 }
-```
-
-The downside to this approach is that if you hit EOF or an error early, many of these fields will return default values (0, empty strings, etc) and continue your logic, so be careful to write code that ensures default values are predicted and don't panic.
-
-Under normal circumstances, using binary.Read() is preferred, but the error check on every single read gets cumbersome for large binary decodes, and is a bit overkill.
-
-I also considered using struct tags, but they require reflection and are a pain when you need to call a function within a struct tag to do custom condition checking on future reads based on a value of a current read.
-
-If you've used other langauges, this approach should be familiar.
