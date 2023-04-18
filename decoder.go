@@ -54,9 +54,27 @@ func (d *Decoder) Bytes(n int) []byte {
 	return b
 }
 
-// FixedString returns fixed string.
-func (d *Decoder) FixedString(n int) string {
+// StringFixed returns fixed string.
+func (d *Decoder) StringFixed(n int) string {
 	return string(d.Bytes(n))
+}
+
+// StringLenPrefix returns string with length prefix assumed to be prior
+func (d *Decoder) StringLenPrefixUint32() string {
+	n := d.Uint32()
+	return d.StringFixed(int(n))
+}
+
+// StringLenPrefix returns string with length prefix assumed to be prior
+func (d *Decoder) StringLenPrefixUint16() string {
+	n := d.Uint16()
+	return d.StringFixed(int(n))
+}
+
+// StringLenPrefix returns string with length prefix assumed to be prior
+func (d *Decoder) StringLenPrefixUint8() string {
+	n := d.Uint8()
+	return d.StringFixed(int(n))
 }
 
 // StringZero reads the read stream until a zero terminator is found.

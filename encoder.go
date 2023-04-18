@@ -48,8 +48,8 @@ func (e *Encoder) StringZero(s string) {
 	e.Bytes([]byte{0})
 }
 
-// FixedString writes fixed string.
-func (e *Encoder) FixedString(s string, n int) {
+// StringFixed writes fixed string.
+func (e *Encoder) StringFixed(s string, n int) {
 	if len(s) > n {
 		s = s[:n]
 	}
@@ -57,6 +57,24 @@ func (e *Encoder) FixedString(s string, n int) {
 		s += string(make([]byte, n-len(s)))
 	}
 	e.Bytes([]byte(s))
+}
+
+// StringLenPrefixUint8 writes string with uint8 length prefix.
+func (e *Encoder) StringLenPrefixUint8(s string) {
+	e.Uint8(uint8(len(s)))
+	e.String(s)
+}
+
+// StringLenPrefixUint16 writes string with uint16 length prefix.
+func (e *Encoder) StringLenPrefixUint16(s string) {
+	e.Uint16(uint16(len(s)))
+	e.String(s)
+}
+
+// StringLenPrefixUint32 writes string with uint32 length prefix.
+func (e *Encoder) StringLenPrefixUint32(s string) {
+	e.Uint32(uint32(len(s)))
+	e.String(s)
 }
 
 // Uint8 writes uint8.
