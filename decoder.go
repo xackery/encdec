@@ -54,6 +54,10 @@ func (d *Decoder) Bytes(n int) []byte {
 	return b
 }
 
+func (d *Decoder) Byte() byte {
+	return d.Bytes(1)[0]
+}
+
 // StringFixed returns fixed string.
 func (d *Decoder) StringFixed(n int) string {
 	return string(d.Bytes(n))

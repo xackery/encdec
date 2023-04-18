@@ -37,6 +37,17 @@ func (e *Encoder) Bytes(b []byte) {
 	}
 }
 
+// Byte writes byte.
+func (e *Encoder) Byte(b byte) {
+	err := binary.Write(e.w, e.order, b)
+	if err != nil {
+		e.lastError = err
+		if e.firstError != nil {
+			e.firstError = e.lastError
+		}
+	}
+}
+
 // String writes string.
 func (e *Encoder) String(s string) {
 	e.Bytes([]byte(s))
