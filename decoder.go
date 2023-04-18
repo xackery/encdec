@@ -107,6 +107,11 @@ func (d *Decoder) StringZero() string {
 	return s
 }
 
+// Bool returns bool.
+func (d *Decoder) Bool() bool {
+	return d.Byte() != 0
+}
+
 // Uint8 returns uint8.
 func (d *Decoder) Uint8() uint8 {
 	var v uint8
