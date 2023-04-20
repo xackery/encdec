@@ -1,4 +1,6 @@
 # encdec
+[![GoDoc](https://godoc.org/github.com/xackery/encdec?status.svg)](https://godoc.org/github.com/xackery/encdec) [![Go Report Card](https://goreportcard.com/badge/github.com/xackery/encdec)](https://goreportcard.com/report/github.com/xackery/encdec)
+
 Golang encoder/decoder from io.ReadSeeker and io.Writer
 
 Please note this is not a very rigorous way to decode a io.ReadSeeker/Writer.
