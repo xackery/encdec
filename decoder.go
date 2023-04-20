@@ -63,6 +63,7 @@ func (d *Decoder) Bytes(n int) []byte {
 	return b
 }
 
+// Byte returns byte.
 func (d *Decoder) Byte() byte {
 	return d.Bytes(1)[0]
 }
@@ -72,19 +73,19 @@ func (d *Decoder) StringFixed(n int) string {
 	return string(d.Bytes(n))
 }
 
-// StringLenPrefix returns string with length prefix assumed to be prior
+// StringLenPrefixUint32 returns string with length prefix assumed to be prior
 func (d *Decoder) StringLenPrefixUint32() string {
 	n := d.Uint32()
 	return d.StringFixed(int(n))
 }
 
-// StringLenPrefix returns string with length prefix assumed to be prior
+// StringLenPrefixUint16 returns string with length prefix assumed to be prior
 func (d *Decoder) StringLenPrefixUint16() string {
 	n := d.Uint16()
 	return d.StringFixed(int(n))
 }
 
-// StringLenPrefix returns string with length prefix assumed to be prior
+// StringLenPrefixUint8 returns string with length prefix assumed to be prior
 func (d *Decoder) StringLenPrefixUint8() string {
 	n := d.Uint8()
 	return d.StringFixed(int(n))
