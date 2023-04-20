@@ -37,6 +37,15 @@ func (d *Decoder) Error() error {
 	return d.firstError
 }
 
+// Pos returns current position.
+func (d *Decoder) Pos() int64 {
+	pos, err := d.r.Seek(0, io.SeekCurrent)
+	if err != nil {
+		pos = -1
+	}
+	return pos
+}
+
 // Bytes returns bytes.
 func (d *Decoder) Bytes(n int) []byte {
 	b := make([]byte, n)

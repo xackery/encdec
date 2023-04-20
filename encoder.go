@@ -26,6 +26,19 @@ func (e *Encoder) SetOrder(order binary.ByteOrder) {
 	e.order = order
 }
 
+// Pos returns current position (-1 if not a seeker writer).
+func (e *Encoder) Pos() int64 {
+	seeker, ok := e.w.(io.Seeker)
+	if !ok {
+		return -1
+	}
+	pos, err := seeker.Seek(0, io.SeekCurrent)
+	if err != nil {
+		pos = -1
+	}
+	return pos
+}
+
 // Bytes writes bytes.
 func (e *Encoder) Bytes(b []byte) {
 	err := binary.Write(e.w, e.order, b)
