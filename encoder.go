@@ -222,12 +222,12 @@ func (e *Encoder) Bool(v bool) {
 	}
 }
 
-// LastError returns last error that occured during write.
+// LastError returns last error that occurred during write.
 func (e *Encoder) LastError() error {
 	return e.lastError
 }
 
-// FirstError returns first error that occured during write.
+// FirstError returns first error that occurred during write.
 func (e *Encoder) Error() error {
 	return e.firstError
 }

@@ -27,12 +27,12 @@ func (d *Decoder) SetOrder(order binary.ByteOrder) {
 	d.order = order
 }
 
-// LastError returns last error that occured during read.
+// LastError returns last error that occurred during read.
 func (d *Decoder) LastError() error {
 	return d.lastError
 }
 
-// Error returns first error that occured during read.
+// Error returns first error that occurred during read.
 func (d *Decoder) Error() error {
 	return d.firstError
 }

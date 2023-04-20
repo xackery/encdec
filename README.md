@@ -14,8 +14,8 @@ To obtain, just run  `go get github.com/xackery/encdec`
 - Perk: Don't need to expose properties in a struct. Public (uppercase) is optional
 - Perk: No reflection used, no struct tags needed
 - Perk: Easy to lace in conditional values for variable binary streams
-- Con: Not always super intuitive where a failure occured, since no context of which property failed like with binary.Read/Write
-- Con: Always sanitize default value cases, or a panic may occur with returned values
+- Con: Not always super intuitive where a failure occurred, since no context of which property failed like with binary.Read/Write
+- Con: Always sanitize default value cases, or a panic may occurr with returned values
 
 Example usage (can be seen as a test [here](/example_test.go))
 ```go
