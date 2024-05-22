@@ -1,4 +1,4 @@
-VERSION := v0.0
+VERSION := v0.1
 NAME := encdec
 
 # CICD triggers this
