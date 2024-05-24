@@ -67,14 +67,12 @@ func (e *Encoder) Byte(b byte) {
 // String writes string.
 func (e *Encoder) String(s string) {
 	e.Bytes([]byte(s))
-	e.lastPos += int64(len(s))
 }
 
 // StringZero writes string with zero terminator.
 func (e *Encoder) StringZero(s string) {
 	e.Bytes([]byte(s))
 	e.Bytes([]byte{0})
-	e.lastPos += int64(len(s) + 1)
 }
 
 // StringFixed writes fixed string.
@@ -86,28 +84,24 @@ func (e *Encoder) StringFixed(s string, n int) {
 		s += string(make([]byte, n-len(s)))
 	}
 	e.Bytes([]byte(s))
-	e.lastPos += int64(n)
 }
 
 // StringLenPrefixUint8 writes string with uint8 length prefix.
 func (e *Encoder) StringLenPrefixUint8(s string) {
 	e.Uint8(uint8(len(s)))
 	e.String(s)
-	e.lastPos += int64(len(s)) + 1
 }
 
 // StringLenPrefixUint16 writes string with uint16 length prefix.
 func (e *Encoder) StringLenPrefixUint16(s string) {
 	e.Uint16(uint16(len(s)))
 	e.String(s)
-	e.lastPos += int64(len(s)) + 2
 }
 
 // StringLenPrefixUint32 writes string with uint32 length prefix.
 func (e *Encoder) StringLenPrefixUint32(s string) {
 	e.Uint32(uint32(len(s)))
 	e.String(s)
-	e.lastPos += int64(len(s)) + 4
 }
 
 // Uint8 writes uint8.
