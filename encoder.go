@@ -1,17 +1,20 @@
 package encdec
 
 import (
+	"bytes"
 	"encoding/binary"
 	"io"
 )
 
 // Encoder is struct for encoding data.
 type Encoder struct {
-	order      binary.ByteOrder
-	w          io.Writer
-	firstError error
-	lastError  error
-	lastPos    int64
+	order       binary.ByteOrder
+	w           io.Writer
+	firstError  error
+	lastError   error
+	lastPos     int64
+	isDebugMode bool
+	debugBuf    bytes.Buffer
 }
 
 // NewEncoder returns new Encoder.
@@ -20,6 +23,31 @@ func NewEncoder(w io.Writer, order binary.ByteOrder) *Encoder {
 		order: order,
 		w:     w,
 	}
+}
+
+// SetDebugMode enables every encode call to write to a stored buffer in the encoder to review later
+func (e *Encoder) SetDebugMode(value bool) {
+	e.isDebugMode = value
+}
+
+// DebugBuf returns the debug buffer
+func (e *Encoder) DebugBuf() []byte {
+	return e.debugBuf.Bytes()
+}
+
+// DebugString returns the debug buffer as a string
+func (e *Encoder) DebugString() string {
+	return string(e.debugBuf.Bytes())
+}
+
+// DebugClear clears the debug buffer
+func (e *Encoder) DebugClear() {
+	e.debugBuf.Reset()
+}
+
+// IsDebugMode returns if debug mode is enabled
+func (e *Encoder) IsDebugMode() bool {
+	return e.isDebugMode
 }
 
 // SetOrder sets byte order.
@@ -45,9 +73,12 @@ func (e *Encoder) Bytes(b []byte) {
 	err := binary.Write(e.w, e.order, b)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
 		}
+	}
+	if e.isDebugMode {
+		e.debugBuf.Write(b)
 	}
 	e.lastPos += int64(len(b))
 }
@@ -57,9 +88,12 @@ func (e *Encoder) Byte(b byte) {
 	err := binary.Write(e.w, e.order, b)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
 		}
+	}
+	if e.isDebugMode {
+		e.debugBuf.WriteByte(b)
 	}
 	e.lastPos++
 }
@@ -109,9 +143,12 @@ func (e *Encoder) Uint8(v uint8) {
 	err := binary.Write(e.w, e.order, v)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
 		}
+	}
+	if e.isDebugMode {
+		e.debugBuf.WriteByte(v)
 	}
 	e.lastPos += 1
 }
@@ -121,9 +158,12 @@ func (e *Encoder) Uint16(v uint16) {
 	err := binary.Write(e.w, e.order, v)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
 		}
+	}
+	if e.isDebugMode {
+		e.debugBuf.Write([]byte{byte(v >> 8), byte(v)})
 	}
 	e.lastPos += 2
 }
@@ -133,9 +173,12 @@ func (e *Encoder) Uint32(v uint32) {
 	err := binary.Write(e.w, e.order, v)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
 		}
+	}
+	if e.isDebugMode {
+		e.debugBuf.Write([]byte{byte(v >> 24), byte(v >> 16), byte(v >> 8), byte(v)})
 	}
 	e.lastPos += 4
 }
@@ -145,9 +188,13 @@ func (e *Encoder) Uint64(v uint64) {
 	err := binary.Write(e.w, e.order, v)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
 		}
+	}
+	if e.isDebugMode {
+		e.debugBuf.Write([]byte{byte(v >> 56), byte(v >> 48), byte(v >> 40), byte(v >> 32),
+			byte(v >> 24), byte(v >> 16), byte(v >> 8), byte(v)})
 	}
 	e.lastPos += 8
 }
@@ -157,9 +204,12 @@ func (e *Encoder) Int8(v int8) {
 	err := binary.Write(e.w, e.order, v)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
 		}
+	}
+	if e.isDebugMode {
+		e.debugBuf.WriteByte(byte(v))
 	}
 	e.lastPos += 1
 }
@@ -169,9 +219,12 @@ func (e *Encoder) Int16(v int16) {
 	err := binary.Write(e.w, e.order, v)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
 		}
+	}
+	if e.isDebugMode {
+		e.debugBuf.Write([]byte{byte(v >> 8), byte(v)})
 	}
 	e.lastPos += 2
 }
@@ -181,9 +234,12 @@ func (e *Encoder) Int32(v int32) {
 	err := binary.Write(e.w, e.order, v)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
 		}
+	}
+	if e.isDebugMode {
+		e.debugBuf.Write([]byte{byte(v >> 24), byte(v >> 16), byte(v >> 8), byte(v)})
 	}
 	e.lastPos += 4
 }
@@ -193,9 +249,13 @@ func (e *Encoder) Int64(v int64) {
 	err := binary.Write(e.w, e.order, v)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
 		}
+	}
+	if e.isDebugMode {
+		e.debugBuf.Write([]byte{byte(v >> 56), byte(v >> 48), byte(v >> 40), byte(v >> 32),
+			byte(v >> 24), byte(v >> 16), byte(v >> 8), byte(v)})
 	}
 	e.lastPos += 8
 }
@@ -205,9 +265,14 @@ func (e *Encoder) Float32(v float32) {
 	err := binary.Write(e.w, e.order, v)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
 		}
+	}
+	if e.isDebugMode {
+		// Convert float32 to uint32 bits and write those bytes
+		bits := float32bits(v)
+		e.debugBuf.Write([]byte{byte(bits >> 24), byte(bits >> 16), byte(bits >> 8), byte(bits)})
 	}
 	e.lastPos += 4
 }
@@ -217,9 +282,15 @@ func (e *Encoder) Float64(v float64) {
 	err := binary.Write(e.w, e.order, v)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
 		}
+	}
+	if e.isDebugMode {
+		// Convert float64 to uint64 bits and write those bytes
+		bits := float64bits(v)
+		e.debugBuf.Write([]byte{byte(bits >> 56), byte(bits >> 48), byte(bits >> 40), byte(bits >> 32),
+			byte(bits >> 24), byte(bits >> 16), byte(bits >> 8), byte(bits)})
 	}
 	e.lastPos += 8
 }
@@ -229,8 +300,15 @@ func (e *Encoder) Bool(v bool) {
 	err := binary.Write(e.w, e.order, v)
 	if err != nil {
 		e.lastError = err
-		if e.firstError != nil {
+		if e.firstError == nil {
 			e.firstError = e.lastError
+		}
+	}
+	if e.isDebugMode {
+		if v {
+			e.debugBuf.WriteByte(1)
+		} else {
+			e.debugBuf.WriteByte(0)
 		}
 	}
 	e.lastPos += 1
@@ -244,4 +322,13 @@ func (e *Encoder) LastError() error {
 // FirstError returns first error that occurred during write.
 func (e *Encoder) Error() error {
 	return e.firstError
+}
+
+// Helper functions for float bit representation
+func float32bits(f float32) uint32 {
+	return binary.BigEndian.Uint32([]byte{0, 0, 0, 0})
+}
+
+func float64bits(f float64) uint64 {
+	return binary.BigEndian.Uint64([]byte{0, 0, 0, 0, 0, 0, 0, 0})
 }
