@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"io"
+	"math"
 )
 
 // Encoder is struct for encoding data.
@@ -271,7 +272,7 @@ func (e *Encoder) Float32(v float32) {
 	}
 	if e.isDebugMode {
 		// Convert float32 to uint32 bits and write those bytes
-		bits := float32bits(v)
+		bits := math.Float32bits(v)
 		e.debugBuf.Write([]byte{byte(bits >> 24), byte(bits >> 16), byte(bits >> 8), byte(bits)})
 	}
 	e.lastPos += 4
@@ -287,8 +288,7 @@ func (e *Encoder) Float64(v float64) {
 		}
 	}
 	if e.isDebugMode {
-		// Convert float64 to uint64 bits and write those bytes
-		bits := float64bits(v)
+		bits := math.Float64bits(v)
 		e.debugBuf.Write([]byte{byte(bits >> 56), byte(bits >> 48), byte(bits >> 40), byte(bits >> 32),
 			byte(bits >> 24), byte(bits >> 16), byte(bits >> 8), byte(bits)})
 	}
@@ -322,13 +322,4 @@ func (e *Encoder) LastError() error {
 // FirstError returns first error that occurred during write.
 func (e *Encoder) Error() error {
 	return e.firstError
-}
-
-// Helper functions for float bit representation
-func float32bits(f float32) uint32 {
-	return binary.BigEndian.Uint32([]byte{0, 0, 0, 0})
-}
-
-func float64bits(f float64) uint64 {
-	return binary.BigEndian.Uint64([]byte{0, 0, 0, 0, 0, 0, 0, 0})
 }
