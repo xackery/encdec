@@ -89,6 +89,9 @@ func (d *Decoder) Bytes(n int) []byte {
 			d.firstError = d.lastError
 		}
 	}
+	if d.isDebugMode {
+		d.debugBuf.Write(b)
+	}
 	return b
 }
 
